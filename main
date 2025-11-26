@@ -1,0 +1,149 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Rational {
+private:
+	int64_t numerator_;
+	int64_t denominator_;
+
+	void reduce() {
+		int64_t a = abs(numerator_), b = abs(denominator_);
+		while (a != 0 and b != 0) { if (a > b) { a %= b; } else { b %= a; } }
+		numerator_ /= (a + b); denominator_ /= (a + b);
+	}
+
+public:
+	Rational() {
+		numerator_ = 0;
+		denominator_ = 1;
+	}
+	Rational(int64_t num) {
+		numerator_ = num;
+		denominator_ = 1;
+	}
+	Rational(int64_t num, int64_t den) {
+		numerator_ = num;
+		denominator_ = den;
+		reduce();
+	}
+
+	int64_t numerator() const { return numerator_; }
+	uint64_t denominator() const { return denominator_; }
+
+	double toDouble() const {
+		return static_cast<double>(numerator_) / denominator_;
+	}
+	std::string str() const {
+		if (denominator_ == 1) { return std::to_string(numerator_); }
+		else { return std::to_string(numerator_) + "/" + std::to_string(denominator_); }
+	}
+
+	Rational operator+ (const Rational& rational) const {
+		Rational res = *this;
+		res += rational;
+		return res;
+	}
+	Rational& operator+= (const Rational& rational) {
+		uint64_t common_denominator = denominator_ * rational.denominator();
+		uint64_t new_numerator = numerator_ * (common_denominator / denominator_)
+			+ rational.numerator_ * (common_denominator / rational.denominator_);
+		numerator_ = new_numerator;
+		denominator_ = common_denominator;
+		reduce();
+		return *this;
+	}
+	Rational operator- (const Rational& rational) const {
+		Rational res = *this;
+		res -= rational;
+		return res;
+	}
+	Rational& operator-= (const Rational& rational) {
+		uint64_t common_denominator = denominator_ * rational.denominator();
+		uint64_t new_numerator = numerator_ * (common_denominator / denominator_)
+			- rational.numerator_ * (common_denominator / rational.denominator_);
+		numerator_ = new_numerator;
+		denominator_ = common_denominator;
+		reduce();
+		return *this;
+	}
+	Rational operator* (const Rational& rational) const {
+		Rational res = *this;
+		res *= rational;
+		return res;
+	}
+	Rational& operator*= (const Rational& rational) {
+		numerator_ *= rational.numerator_;
+		denominator_ *= rational.denominator_;
+		reduce();
+		return *this;
+	}
+	Rational operator/ (const Rational& rational) const {
+		Rational res = *this;
+		res /= rational;
+		return res;
+	}
+	Rational& operator/= (const Rational& rational) {
+		numerator_ *= rational.denominator_;
+		denominator_ *= rational.numerator_;
+		reduce();
+		return *this;
+	}
+	Rational operator- () const {
+		return *this * (-1);
+	}
+	bool operator== (const Rational& rational) const {
+		return numerator_ == rational.numerator() and denominator_ == rational.denominator();
+	}
+	bool operator!= (const Rational& rational) const {
+		return numerator_ != rational.numerator() or denominator_ != rational.denominator();
+	}
+	bool operator< (const Rational& rational) const {
+		return toDouble() < rational.toDouble();
+	}
+	bool operator<= (const Rational& rational) const {
+		return toDouble() <= rational.toDouble();
+	}
+	bool operator> (const Rational& rational) const {
+		return toDouble() > rational.toDouble();
+	}
+	bool operator>= (const Rational& rational) const {
+		return toDouble() >= rational.toDouble();
+	}
+};
+
+int main() {
+	Rational d1 = Rational();
+	Rational d2 = Rational(2);
+	Rational d3 = Rational(-3, 8);
+	Rational d4 = Rational(512, 1024);
+
+	cout << "d3: " << d3.toDouble() << " = " << d3.str() << endl;
+	cout << "d4: " << d4.toDouble() << " = " << d4.str() << endl;
+
+	Rational d5 = d3 + d4;
+	Rational d6 = d3 - d4;
+	Rational d7 = d3 * d4;
+	Rational d8 = d3 / d4;
+
+	cout << "d5=d3+d4: " << d5.str() << endl;
+	cout << "d6=d3-d4: " << d6.str() << endl;
+	cout << "d7=d3*d4: " << d7.str() << endl;
+	cout << "d8=d3/d4: " << d8.str() << endl;
+
+	d5 += d6;
+	d6 -= d3;
+	d7 *= d4;
+	d8 /= d2;
+
+	cout << "d5+=d6: " << d5.str() << endl;
+	cout << "d6-=d3: " << d6.str() << endl;
+	cout << "d7*=d4: " << d7.str() << endl;
+	cout << "d8/=d2: " << d8.str() << endl;
+
+	cout << "-d3: " <<(-d3).str() << endl;
+
+	if (d3 >= d4) { cout << "true" << endl; }
+	else { cout << "false" << endl; }
+	return 0;
+}
